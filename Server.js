@@ -1,3 +1,4 @@
+let transactions = []const
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -59,4 +60,20 @@ app.get("/admin/messages", (req, res) => {
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
-});
+}// Save investment transaction
+app.post("/transaction", (req, res) => {
+  const { amount, date } = req.body;
+
+  if (!amount) {
+    return res.status(400).json({ error: "Amount required" });
+  }
+
+  transactions.push({
+    amount,
+    date,
+    status: "pending"
+  });
+
+  res.json({ success: true });
+}););
+
