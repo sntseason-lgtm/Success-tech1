@@ -1,79 +1,52 @@
-let transactions = []const
 const express = require("express");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
+// Middlewares
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("SUCCESS-TECH backend is running");
-});
-
-// TEMP storage (we will upgrade later)
-let users = [];
-let transactions = [];
+// TEMP STORAGE (later we’ll use database)
 let messages = [];
+let investments = [];
 
-// Register
-app.post("/register", (req, res) => {
-  users.push(req.body);
-  res.json({ success: true, message: "User registered" });
+// ✅ HOME TEST
+app.get("/", (req, res) => {
+  res.send("SUCCESS-TECH Backend is running");
 });
 
-// Login
-app.post("/login", (req, res) => {
-  const user = users.find(
-    u => u.email === req.body.email && u.password === req.body.password
-  );
-  if (user) {
-    res.json({ success: true });
-  } else {
-    res.json({ success: false });
-  }
-});
-
-// Save transaction
-app.post("/transaction", (req, res) => {
-  transactions.push(req.body);
-  res.json({ success: true });
-});
-
-// Admin get transactions
-app.get("/admin/transactions", (req, res) => {
-  res.json(transactions);
-});
-
-// Messages (chatbot)
+// ✅ SAVE CHAT MESSAGE
 app.post("/message", (req, res) => {
-  messages.push(req.body);
+  const { message, time } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "Message required" });
+  }
+
+  messages.push({ message, time });
   res.json({ success: true });
 });
 
+// ✅ ADMIN – VIEW MESSAGES
 app.get("/admin/messages", (req, res) => {
   res.json(messages);
 });
 
+// ✅ SAVE INVESTMENT
+app.post("/invest", (req, res) => {
+  const data = req.body;
+  investments.push(data);
+  res.json({ success: true });
+});
+
+// ✅ ADMIN – VIEW INVESTMENTS
+app.get("/admin/investments", (req, res) => {
+  res.json(investments);
+});
+
+// START SERVER
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
-}// Save investment transaction
-app.post("/transaction", (req, res) => {
-  const { amount, date } = req.body;
-
-  if (!amount) {
-    return res.status(400).json({ error: "Amount required" });
-  }
-
-  transactions.push({
-    amount,
-    date,
-    status: "pending"
-  });
-
-  res.json({ success: true });
-}););
-
+});
