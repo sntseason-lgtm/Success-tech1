@@ -51,6 +51,10 @@ app.get("/admin/investments", (req, res) => {
 });
 
 // START SERVER
+app.get("/", (req, res) => {
+  res.send("Backend is live");
+});
+
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
