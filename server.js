@@ -5,14 +5,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ROOT TEST
 app.get("/", (req, res) => {
   res.send("Backend is live");
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+// TEMP in-memory storage
+global.investments = [];
 
 // Save investment
 app.post("/api/invest", (req, res) => {
@@ -22,7 +21,6 @@ app.post("/api/invest", (req, res) => {
     return res.status(400).json({ message: "All fields required" });
   }
 
-  // TEMP: store in memory (we'll add database later)
   const investment = {
     id: Date.now(),
     name,
@@ -32,9 +30,20 @@ app.post("/api/invest", (req, res) => {
     date: new Date()
   };
 
-  global.investments = global.investments || [];
   global.investments.push(investment);
 
-  res.json({ message: "Investment saved", investment });
+  res.json({
+    message: "Investment saved",
+    investment
+  });
 });
 
+// Admin: get all investments
+app.get("/admin/investments", (req, res) => {
+  res.json(global.investments);
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
+});
