@@ -2,35 +2,54 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
+
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// ROOT TEST
+// ==============================
+// TEMP IN-MEMORY DATA
+// ==============================
+let investments = [];
+let notifications = [
+  { message: "Welcome to SUCCESS-TECH" },
+  { message: "Your account is active" }
+];
+
+// ==============================
+// ROOT TEST ROUTE
+// ==============================
 app.get("/", (req, res) => {
-  res.send("Backend is live");
+  res.send("SUCCESS-TECH backend is running");
 });
 
-// TEMP in-memory storage
-global.investments = [];
-
-// Save investment
+// ==============================
+// CREATE INVESTMENT
+// ==============================
 app.post("/api/invest", (req, res) => {
   const { name, email, amount, plan } = req.body;
 
   if (!name || !email || !amount || !plan) {
-    return res.status(400).json({ message: "All fields required" });
+    return res.status(400).json({
+      error: "All fields are required"
+    });
   }
 
   const investment = {
     id: Date.now(),
     name,
     email,
-    amount,
+    amount: Number(amount),
     plan,
-    date: new Date()
+    date: new Date().toISOString()
   };
 
-  global.investments.push(investment);
+  investments.push(investment);
+
+  // Add notification
+  notifications.unshift({
+    message: `Investment of ₦${amount} submitted successfully`
+  });
 
   res.json({
     message: "Investment saved",
@@ -38,12 +57,25 @@ app.post("/api/invest", (req, res) => {
   });
 });
 
-// Admin: get all investments
+// ==============================
+// ADMIN: VIEW ALL INVESTMENTS
+// ==============================
 app.get("/admin/investments", (req, res) => {
-  res.json(global.investments);
+  res.json(investments);
 });
 
-const PORT = process.env.PORT || 5000;
+// ==============================
+// USER NOTIFICATIONS
+// ==============================
+app.get("/api/notifications", (req, res) => {
+  res.json(notifications);
+});
+
+// ==============================
+// SERVER START
+// ==============================
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+  console.log("SUCCESS-TECH server running on port " + PORT);
 });
