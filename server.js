@@ -7,75 +7,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ==============================
-// TEMP IN-MEMORY DATA
-// ==============================
-let investments = [];
-let notifications = [
-  { message: "Welcome to SUCCESS-TECH" },
-  { message: "Your account is active" }
-];
-
-// ==============================
-// ROOT TEST ROUTE
-// ==============================
+// Test route (VERY IMPORTANT)
 app.get("/", (req, res) => {
-  res.send("SUCCESS-TECH backend is running");
+  res.send("Backend is running 🚀");
 });
 
-// ==============================
-// CREATE INVESTMENT
-// ==============================
-app.post("/api/invest", (req, res) => {
-  const { name, email, amount, plan } = req.body;
+// ===== ADMIN ROUTES =====
 
-  if (!name || !email || !amount || !plan) {
-    return res.status(400).json({
-      error: "All fields are required"
-    });
-  }
-
-  const investment = {
-    id: Date.now(),
-    name,
-    email,
-    amount: Number(amount),
-    plan,
-    date: new Date().toISOString()
-  };
-
-  investments.push(investment);
-
-  // Add notification
-  notifications.unshift({
-    message: `Investment of ₦${amount} submitted successfully`
-  });
-
-  res.json({
-    message: "Investment saved",
-    investment
-  });
+// Admin messages
+app.get("/admin/messages", (req, res) => {
+  res.json([]);
 });
 
-// ==============================
-// ADMIN: VIEW ALL INVESTMENTS
-// ==============================
+// Admin investments
 app.get("/admin/investments", (req, res) => {
-  res.json(investments);
+  res.json([]);
 });
 
-// ==============================
-// USER NOTIFICATIONS
-// ==============================
-app.get("/api/notifications", (req, res) => {
-  res.json(notifications);
-});
-
-// ==============================
-// SERVER START
-// ==============================
-const PORT = process.env.PORT || 3000;
+// ===== SERVER START =====
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log("SUCCESS-TECH server running on port " + PORT);
+  console.log(`Server running on port ${PORT}`);
 });
