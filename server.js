@@ -1,32 +1,71 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
-// Middlewares
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Test route (VERY IMPORTANT)
+// ===============================
+// MongoDB Connection
+// ===============================
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB error:", err));
+
+// ===============================
+// Message Schema
+// ===============================
+const messageSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  message: String,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Message = mongoose.model("Message", messageSchema);
+
+// ===============================
+// Routes
+// ===============================
+
+// Test route
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-// ===== ADMIN ROUTES =====
-
-// Admin messages
-app.get("/admin/messages", (req, res) => {
-  res.json([]);
+// Create message (from frontend)
+app.post("/messages", async (req, res) => {
+  try {
+    const newMessage = new Message(req.body);
+    await newMessage.save();
+    res.status(201).json({ success: true, message: "Message saved" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-// Admin investments
-app.get("/admin/investments", (req, res) => {
-  res.json([]);
+// Admin: get all messages
+app.get("/admin/messages", async (req, res) => {
+  try {
+    const messages = await Message.find().sort({ createdAt: -1 });
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// ===== SERVER START =====
+// ===============================
+// Server
+// ===============================
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
