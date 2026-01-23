@@ -69,3 +69,20 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+app.get("/test-db", async (req, res) => {
+  try {
+    const test = await Message.create({
+      name: "Test User",
+      email: "test@test.com",
+      message: "Hello MongoDB"
+    });
+
+    res.json({
+      success: true,
+      saved: test
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
