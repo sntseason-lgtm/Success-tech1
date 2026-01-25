@@ -54,12 +54,14 @@ app.post("/messages", async (req, res) => {
 
 // Admin: get all messages
 app.get("/admin/messages", async (req, res) => {
-  try {
-    const messages = await Message.find().sort({ createdAt: -1 });
-    res.json(messages);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  const key = req.query.key;
+
+  if (key !== process.env.ADMIN_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
   }
+
+  const messages = await Message.find().sort({ createdAt: -1 });
+  res.json(messages);
 });
 
 // ===============================
