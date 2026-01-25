@@ -109,8 +109,12 @@ app.get("/admin", async (req, res) => {
       <div class="card">
         <strong>${msg.name}</strong>
         <div class="email">${msg.email}</div>
-        <p>${msg.message}</p>
-        <div class="date">${msg.createdAt.toLocaleString()}</div>
+         <p>${msg.message}</p>
+<a href="/admin/delete/${msg._id}?key=${key}" 
+   style="color:red; text-decoration:none;">
+   🗑️ Delete
+</a>
+<div class="date">${msg.createdAt.toLocaleString()}</div>
       </div>
     `;
   });
@@ -118,6 +122,18 @@ app.get("/admin", async (req, res) => {
   html += `</body></html>`;
 
   res.send(html);
+});
+
+app.get("/admin/delete/:id", async (req, res) => {
+  const key = req.query.key;
+
+  if (key !== process.env.ADMIN_KEY) {
+    return res.send("❌ Unauthorized");
+  }
+
+  await Message.findByIdAndDelete(req.params.id);
+
+  res.redirect(`/admin?key=${key}`);
 });
 
 // ===============================
