@@ -64,6 +64,62 @@ app.get("/admin/messages", async (req, res) => {
   res.json(messages);
 });
 
+app.get("/admin", async (req, res) => {
+  const key = req.query.key;
+
+  if (key !== process.env.ADMIN_KEY) {
+    return res.send("<h2>❌ Unauthorized</h2>");
+  }
+
+  const messages = await Message.find().sort({ createdAt: -1 });
+
+  let html = `
+    <html>
+    <head>
+      <title>Admin Dashboard</title>
+      <style>
+        body {
+          font-family: Arial;
+          background: #f4f4f4;
+          padding: 20px;
+        }
+        .card {
+          background: #fff;
+          padding: 15px;
+          margin-bottom: 15px;
+          border-radius: 5px;
+          box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .email {
+          color: #555;
+          font-size: 14px;
+        }
+        .date {
+          font-size: 12px;
+          color: #999;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>📩 Contact Messages</h1>
+  `;
+
+  messages.forEach(msg => {
+    html += `
+      <div class="card">
+        <strong>${msg.name}</strong>
+        <div class="email">${msg.email}</div>
+        <p>${msg.message}</p>
+        <div class="date">${msg.createdAt.toLocaleString()}</div>
+      </div>
+    `;
+  });
+
+  html += `</body></html>`;
+
+  res.send(html);
+});
+
 // ===============================
 // Server
 // ===============================
