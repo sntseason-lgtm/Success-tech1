@@ -1,7 +1,10 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-require("dotenv").config();
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
@@ -9,154 +12,66 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ===============================
-// MongoDB Connection
-// ===============================
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err));
-
-// ===============================
-// Message Schema
-// ===============================
-const messageSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  message: String,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+// ===== TEST ROUTE =====
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully 🚀");
 });
+
+// ===== ADMIN TEST ROUTE =====
+app.get("/admin", (req, res) => {
+  res.json({ message: "Admin route working ✅" });
+});
+
+// ===== MONGODB CONNECTION =====
+const mongoURI = process.env.MONGO_URI;
+
+if (!mongoURI) {
+  console.error("❌ MONGO_URI is missing in environment variables");
+  process.exit(1);
+}
+
+mongoose
+  .connect(mongoURI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
+
+// ===== MESSAGE SCHEMA =====
+const messageSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    message: { type: String, required: true },
+  },
+  { timestamps: true }
+);
 
 const Message = mongoose.model("Message", messageSchema);
 
-// ===============================
-// Routes
-// ===============================
-
-// Test route
-app.get("/", (req, res) => {
-  res.send("Backend is running 🚀");
-});
-
-// Create message (from frontend)
-app.post("/messages", async (req, res) => {
+// ===== CONTACT FORM ROUTE =====
+app.post("/contact", async (req, res) => {
   try {
-    const newMessage = new Message(req.body);
+    const { name, email, message } = req.body;
+
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const newMessage = new Message({ name, email, message });
     await newMessage.save();
-    res.status(201).json({ success: true, message: "Message saved" });
+
+    res.status(201).json({ success: true, message: "Message sent successfully ✅" });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error("❌ Contact error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// Admin: get all messages
-app.get("/admin/messages", async (req, res) => {
-  const key = req.query.key;
-
-  if (key !== process.env.ADMIN_KEY) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  const messages = await Message.find().sort({ createdAt: -1 });
-  res.json(messages);
-});
-
-app.get("/admin", async (req, res) => {
-  const key = req.query.key;
-
-  if (key !== process.env.ADMIN_KEY) {
-    return res.send("<h2>❌ Unauthorized</h2>");
-  }
-
-  const messages = await Message.find().sort({ createdAt: -1 });
-
-  let html = `
-    <html>
-    <head>
-      <title>Admin Dashboard</title>
-      <style>
-        body {
-          font-family: Arial;
-          background: #f4f4f4;
-          padding: 20px;
-        }
-        .card {
-          background: #fff;
-          padding: 15px;
-          margin-bottom: 15px;
-          border-radius: 5px;
-          box-shadow: 0 0 5px rgba(0,0,0,0.1);
-        }
-        .email {
-          color: #555;
-          font-size: 14px;
-        }
-        .date {
-          font-size: 12px;
-          color: #999;
-        }
-      </style>
-    </head>
-    <body>
-      <h1>📩 Contact Messages</h1>
-  `;
-
-  messages.forEach(msg => {
-    html += `
-      <div class="card">
-        <strong>${msg.name}</strong>
-        <div class="email">${msg.email}</div>
-         <p>${msg.message}</p>
-<a href="/admin/delete/${msg._id}?key=${key}" 
-   style="color:red; text-decoration:none;">
-   🗑️ Delete
-</a>
-<div class="date">${msg.createdAt.toLocaleString()}</div>
-      </div>
-    `;
-  });
-
-  html += `</body></html>`;
-
-  res.send(html);
-});
-
-app.get("/admin/delete/:id", async (req, res) => {
-  const key = req.query.key;
-
-  if (key !== process.env.ADMIN_KEY) {
-    return res.send("❌ Unauthorized");
-  }
-
-  await Message.findByIdAndDelete(req.params.id);
-
-  res.redirect(`/admin?key=${key}`);
-});
-
-// ===============================
-// Server
-// ===============================
+// ===== START SERVER =====
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
-
-app.get("/test-db", async (req, res) => {
-  try {
-    const test = await Message.create({
-      name: "Test User",
-      email: "test@test.com",
-      message: "Hello MongoDB"
-    });
-
-    res.json({
-      success: true,
-      saved: test
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  console.log(`✅ Server running on port ${PORT}`);
 });
