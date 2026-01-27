@@ -1,10 +1,10 @@
-import connectDB from "./db.js";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import connectDB from "./db.js";
+import Message from "./models/Message.js";
 
 dotenv.config();
-
 connectDB();
 
 const app = express();
@@ -13,14 +13,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Test route
+// TEST ROUTE
 app.get("/", (req, res) => {
   res.send("Server running successfully 🚀");
 });
 
-// Port
-const PORT = process.env.PORT || 10000;
+// ✅ CONTACT ROUTE (ADD IT HERE)
+app.post("/contact", async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
 
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    await Message.create({ name, email, message });
+
+    res.status(201).json({
+      success: true,
+      message: "Message sent successfully"
+    });
+  } catch (error) {
+    console.error("Contact error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// START SERVER
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
