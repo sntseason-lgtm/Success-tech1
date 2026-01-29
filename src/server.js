@@ -1,8 +1,8 @@
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from "dotenv";
-import connectDB from "./db.js";
 import Message from "./models/Message.js";
+import connectDB from "./db.js";
 
 dotenv.config();
 connectDB();
