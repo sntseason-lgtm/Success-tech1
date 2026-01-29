@@ -5,21 +5,19 @@ const messageSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      trim: true
     },
+
     email: {
       type: String,
       required: true,
-      trim: true
     },
+
     message: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-const Message = mongoose.model("Message", messageSchema);
-
-export default Message;
+export default mongoose.model("Message", messageSchema);
