@@ -8,34 +8,36 @@ dotenv.config();
 
 const app = express();
 
-// middleware
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// connect database
+// Connect DB
 connectDB();
 
-// test route
+// Test route
 app.get("/", (req, res) => {
-  res.send("Server running successfully");
+  res.send("Backend running successfully 🚀");
 });
 
-// contact route
+// Contact route
 app.post("/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    const newMessage = new Message({
-      name,
-      email,
-      message
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    await Message.create({ name, email, message });
+
+    res.status(201).json({
+      success: true,
+      message: "Message sent successfully"
     });
-
-    await newMessage.save();
-
-    res.status(200).json({ success: true });
   } catch (error) {
-    res.status(500).json({ success: false });
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
