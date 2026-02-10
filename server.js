@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db.js";
 import Message from "./models/Message.js";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
