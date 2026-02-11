@@ -51,12 +51,19 @@ app.post("/contact", async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Save to MongoDB
-    await Message.create({
-      name,
-      email,
-      message
+    const saved = await Message.create({ name, email, message });
+
+    res.status(201).json({ success: true, saved });
+
+  } catch (err) {
+    console.log("CONTACT ERROR:", err);
+
+    res.status(500).json({ 
+      error: "Server error",
+      details: err.message
     });
+  }
+});
 
     // ===== SEND EMAIL TO YOU =====
     await transporter.sendMail({
