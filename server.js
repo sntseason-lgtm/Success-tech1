@@ -17,6 +17,34 @@ app.get("/", (req, res) => {
   res.send("Backend running successfully 🚀");
 });
 
+// ================== LOGIN ROUTE ==================
+app.post("/admin-login", (req, res) => {
+  const { password } = req.body;
+
+  if (password === process.env.ADMIN_PASSWORD) {
+    return res.json({ success: true });
+  }
+
+  res.status(401).json({ error: "Invalid password" });
+});
+
+// ================== GET MESSAGES (PROTECTED) ==================
+app.post("/get-messages", async (req, res) => {
+  const { password } = req.body;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const messages = await Message.find().sort({ createdAt: -1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ================== CONTACT ==================
 app.post("/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
@@ -25,24 +53,12 @@ app.post("/contact", async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const saved = await Message.create({
-      name,
-      email,
-      message,
-    });
+    await Message.create({ name, email, message });
 
-    res.status(201).json({
-      success: true,
-      saved,
-    });
+    res.status(201).json({ success: true });
 
   } catch (err) {
-    console.log("CONTACT ERROR:", err);
-
-    res.status(500).json({
-      error: "Server error",
-      details: err.message,
-    });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
