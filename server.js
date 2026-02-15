@@ -44,6 +44,22 @@ app.post("/get-messages", async (req, res) => {
   }
 });
 
+// ================== DELETE MESSAGE ==================
+app.post("/delete-message", async (req, res) => {
+  const { password, id } = req.body;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    await Message.findByIdAndDelete(id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Delete failed" });
+  }
+});
+
 // ================== CONTACT ==================
 app.post("/contact", async (req, res) => {
   try {
