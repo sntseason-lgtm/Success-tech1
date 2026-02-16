@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 
-const MessageSchema = new mongoose.Schema({
+const messageSchema = new mongoose.Schema({
   name: String,
   email: String,
   message: String,
-  date: {
-    type: Date,
-    default: Date.now
+  status: {
+    type: String,
+    default: "unread"
   }
-});
+}, { timestamps: true });
 
-export default mongoose.model("Message", MessageSchema);
+export default mongoose.model("Message", messageSchema);
