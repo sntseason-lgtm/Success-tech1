@@ -83,3 +83,19 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
 });
+
+// ================== MARK AS READ ==================
+app.post("/mark-read", async (req, res) => {
+  const { password, id } = req.body;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    await Message.findByIdAndUpdate(id, { status: "read" });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Update failed" });
+  }
+});
