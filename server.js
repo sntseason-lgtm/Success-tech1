@@ -51,32 +51,20 @@ app.post("/admin-login", async (req, res) => {
   }
 });
 
-// ================== GET MESSAGES (PROTECTED) ==================
-app.post("/get-messages", async (req, res) => {
-  const { password } = req.body;
-
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
+// ================= GET MESSAGES =================
+app.get("/get-messages", auth, async (req, res) => {
   try {
     const messages = await Message.find().sort({ createdAt: -1 });
     res.json(messages);
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Failed to fetch messages" });
   }
 });
 
-// ================== DELETE MESSAGE ==================
-app.post("/delete-message", async (req, res) => {
-  const { password, id } = req.body;
-
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
+// ================= DELETE MESSAGE =================
+app.delete("/delete-message/:id", auth, async (req, res) => {
   try {
-    await Message.findByIdAndDelete(id);
+    await Message.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Delete failed" });
