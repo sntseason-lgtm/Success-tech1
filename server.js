@@ -3,6 +3,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db.js";
 import Message from "./models/Message.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import Admin from "./models/Admin.js";
+import auth from "./middleware/auth.js";
 
 dotenv.config();
 
