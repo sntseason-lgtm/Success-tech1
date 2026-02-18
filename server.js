@@ -108,7 +108,9 @@ app.post("/mark-read", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Update failed" });
-   
+  }
+});
+
     // ================= REGISTER ADMIN =================
 app.post("/register-admin", async (req, res) => {
   try {
@@ -131,5 +133,4 @@ app.post("/register-admin", async (req, res) => {
     res.status(500).json({ error: "Registration failed" });
   }
 });
-  }
-});
+
