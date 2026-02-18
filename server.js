@@ -21,15 +21,34 @@ app.get("/", (req, res) => {
   res.send("Backend running successfully 🚀");
 });
 
-// ================== LOGIN ROUTE ==================
-app.post("/admin-login", (req, res) => {
-  const { password } = req.body;
+// ================= ADMIN LOGIN =================
+app.post("/admin-login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  if (password === process.env.ADMIN_PASSWORD) {
-    return res.json({ success: true });
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: admin._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ token });
+
+  } catch (err) {
+    res.status(500).json({ error: "Login failed" });
   }
-
-  res.status(401).json({ error: "Invalid password" });
 });
 
 // ================== GET MESSAGES (PROTECTED) ==================
