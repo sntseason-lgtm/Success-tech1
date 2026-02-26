@@ -110,27 +110,3 @@ app.post("/mark-read", async (req, res) => {
     res.status(500).json({ error: "Update failed" });
   }
 });
-
-    // ================= REGISTER ADMIN =================
-app.post("/register-admin", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const existing = await Admin.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ error: "Admin already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await Admin.create({
-      email,
-      password: hashedPassword
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Registration failed" });
-  }
-});
-
